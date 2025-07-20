@@ -55,7 +55,7 @@ def attack(update: Update, context: CallbackContext):
     update.message.reply_text(result)
 
 # Запуск бота
-updater = Updater("8156143984:AAFdyGAeVd9EK8BS9lidMFl_JGM8x2Unh7E")
+updater = Updater("YOUR_BOT_TOKEN")
 updater.dispatcher.add_handler(CommandHandler("start", start))
 updater.dispatcher.add_handler(CommandHandler("attack", attack))
 updater.start_polling()
