@@ -40,13 +40,19 @@ class CountryGame:
 
 def start(update: Update, context: CallbackContext):
     user = update.effective_user
-    username = user.username or ""  # Якщо username не вказано, зберігаємо пусту строку
-    cursor.execute(
-        "INSERT OR IGNORE INTO countries VALUES (?, ?, ?, 100, 10, 50)",
-        (user.id, user.first_name, username)
-    )
-    conn.commit()
-    update.message.reply_text(f"🏰 Країна {user.first_name} створена!")
+    try:
+        # Екрануємо спецсимволи в імені
+        safe_name = user.first_name.replace("'", "''")
+        safe_username = user.username.replace("'", "''") if user.username else ""
+        
+        cursor.execute(
+            "INSERT OR IGNORE INTO countries (user_id, name, username) VALUES (?, ?, ?)",
+            (user.id, safe_name, safe_username)
+        )
+        conn.commit()
+        update.message.reply_text(f"🏰 Вітаю, {safe_name}! Ваша країна створена.")
+    except Exception as e:
+        update.message.reply_text(f"❌ Помилка: {str(e)}")
 
 def attack(update: Update, context: CallbackContext):
     if not context.args:
