@@ -13,10 +13,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Конфигурация (берётся из переменных окружения Render)
+# Конфигурация
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-PORT = int(os.getenv('PORT', 10000))  # Для Web-службы на Render
+PORT = int(os.getenv('PORT', 10000))
+WEBHOOK_URL = os.getenv('WEBHOOK_URL', f"https://ochpochmaks_bot.onrender.com/8232810295:AAGQBXlaYyflzhhSYNrrZbxcYzs4-s1Acsg")
 
 # Инициализация Gemini
 genai.configure(api_key=GEMINI_API_KEY)
@@ -66,7 +67,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = user_text[len(trigger_word):].strip()
     
     if not query:
-        await message.reply_text("👋 Задай вопрос после ключевого слова!")
+        await message.reply_text("Ты еблан? Я не буду отвечать на пустое сообщение.")
         return
     
     try:
