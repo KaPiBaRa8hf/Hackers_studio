@@ -13,11 +13,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Конфигурация
+# Конфігурація
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 PORT = int(os.getenv('PORT', 10000))
-WEBHOOK_URL = os.getenv('WEBHOOK_URL', f"https://ochpochmaks_bot.onrender.com/8232810295:AAGQBXlaYyflzhhSYNrrZbxcYzs4-s1Acsg")
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')
+WEBHOOK_PATH = f"/{TELEGRAM_TOKEN}"
 
 # Инициализация Gemini
 genai.configure(api_key=GEMINI_API_KEY)
@@ -96,6 +97,29 @@ def main():
         port=int(os.getenv('PORT', 10000)),
         webhook_url=os.getenv('WEBHOOK_URL'),
     )
+
+app = FastAPI()
+telegram_app = Application.builder().token(TELEGRAM_TOKEN).build()
+
+@app.on_event("startup")
+async def startup():
+    await telegram_app.initialize()
+    await telegram_app.bot.set_webhook(f"{WEBHOOK_URL}{WEBHOOK_PATH}")
+    await telegram_app.start()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await telegram_app.stop()
+    await telegram_app.shutdown()
+
+@app.post(WEBHOOK_PATH)
+async def webhook(update: dict):
+    await telegram_app.update_queue.put(Update.de_json(update, telegram_app.bot))
+    return {"status": "ok"}
+
+if __name__ == "__main__":
+    telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
 
 if __name__ == "__main__":
     main()
