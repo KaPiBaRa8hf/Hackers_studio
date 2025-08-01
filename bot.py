@@ -24,7 +24,7 @@ WEBHOOK_PATH = f"/{TELEGRAM_TOKEN}"
 
 # Инициализация Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.5-pro')
 
 # Триггерные слова
 TRIGGER_WORDS = ["очпоч", "очпочмакс", "Очпоч", "Очпочмакс"]
