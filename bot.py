@@ -2,6 +2,8 @@ import os
 import re
 import time
 import logging
+from fastapi import FastAPI
+import uvicorn
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 import google.generativeai as genai
