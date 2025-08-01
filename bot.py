@@ -1,13 +1,22 @@
 import os
 import re
 import time
+import logging
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 import google.generativeai as genai
 
-# Настройки
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# Настройка логгирования
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# Конфигурация (берётся из переменных окружения Render)
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+PORT = int(os.getenv('PORT', 10000))  # Для Web-службы на Render
 
 # Инициализация Gemini
 genai.configure(api_key=GEMINI_API_KEY)
@@ -47,7 +56,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     last_request_time = user_last_request.get(user_id, 0)
     
     if current_time - last_request_time < 10:
-        await message.reply_text("⏳ Не спамь! Жди 10 секунд...")
+        await message.reply_text("Не так быстро!")
         return
     
     user_last_request[user_id] = current_time
@@ -68,7 +77,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = await model.generate_content_async(full_prompt)
         await message.reply_text(response.text)
     except Exception as e:
-        error_msg = f"⚠️ Ошибка: {str(e)}"
+        error_msg = f"Я сломался: {str(e)}"
         await message.reply_text(error_msg[:400])
 
 def main():
@@ -79,6 +88,14 @@ def main():
         filters.TEXT & ~filters.COMMAND, 
         handle_message
     ))
+
+    # Настройка для Render
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TELEGRAM_TOKEN,
+        webhook_url=f"https://ochpochmaks_bot.onrender.com/{TELEGRAM_TOKEN}"
+    )
     
     print("Бот запущен...")
     app.run_polling()
