@@ -89,17 +89,15 @@ def main():
         filters.TEXT & ~filters.COMMAND, 
         handle_message
     ))
-
-    # Настройка для Render
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        url_path=TELEGRAM_TOKEN,
-        webhook_url=f"https://ochpochmaks_bot.onrender.com/{TELEGRAM_TOKEN}"
+        webhook_url=f"https://ochpochmaks-bot.onrender.com/{TELEGRAM_TOKEN}"
     )
     
     print("Бот запущен...")
-    app.run_polling()
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.getenv('PORT', 10000)),
+        webhook_url=os.getenv('WEBHOOK_URL'),
+    )
 
 if __name__ == "__main__":
     main()
